@@ -25,13 +25,13 @@ const int MIN_ANGLE = 30;
 const int MAX_ANGLE = 180;
 
 int buttonPin = 12;
-boolean prevState;
-boolean drinking; // states whether the system is switched to drinkng/not drinking
+bool prevState = false;
+bool drinking = false; // states whether the system is switched to drinkng/not drinking
 
-// set up the 'counter' feed
+// set up the 'motor-button' feed
 AdafruitIO_Feed *counter = io.feed("motor-button");
 
-void setup() {  
+void setup() {
   // start the serial connection
   Serial.begin(115200);
 
@@ -62,18 +62,18 @@ void setup() {
   // this MQTT client after the io client is connected.
   counter->get();
 
+  // set LED to high to signalize that connection is established
+  pinMode(13, OUTPUT);
+  digitalWrite(13,HIGH);
+
   // we are connected
   Serial.println();
   Serial.println(io.statusText());
 
   // Do our setup for motor
-  Serial.begin(9600);
   servo.attach(9);  // attaches the servo on pin 9 to the servo object
   servo.write(MIN_ANGLE);
   pinMode(buttonPin, INPUT);
-  drinking = false; // init drinking to false
-  prevState = drinking;
-
 }
 
 void loop() {
@@ -84,35 +84,63 @@ void loop() {
   
   if(buttonState == HIGH) {
     // switch drinking state
-    Serial.print("Button pressed: ");
+    Serial.print("Button pressed: drinking ");
     prevState = drinking;
-    drinking = !drinking;
+    if(drinking)
+      drinking = false;
+    else
+      drinking = true;
     Serial.println(drinking);
   }
 
   if(prevState != drinking) {
     // state changed -> rotate
+    Serial.println("drinking state changed!");
+    prevState = drinking;
     if(drinking) {
-      //moveSlow(MIN_ANGLE, MAX_ANGLE, 1);
-      servo.write(MAX_ANGLE);
-        delay(200);
+      moveSlow(MIN_ANGLE, MAX_ANGLE);
     }
     else {
-      //moveSlow(MAX_ANGLE, MIN_ANGLE, -1);
-      servo.write(MIN_ANGLE);
-        delay(200);
+      moveSlow(MAX_ANGLE, MIN_ANGLE);
     }
   }
 
 }
 
-
+// handles incoming message from adafruit io API
 void handleMessage(AdafruitIO_Data *data) {
-  boolean val = data->value();
+  bool val = data->value();
   if(val) {
-    Serial.print("received <- ");
-    Serial.println(val);
+    Serial.print("Received remote button press");
     prevState = drinking;
-    drinking = !drinking;
+    if(drinking)
+      drinking = false;
+    else
+      drinking = true;
+  }
+}
+
+
+// moves servo slowly from first angle to second angle
+void moveSlow(int from, int to) {
+  const int step = 1;
+  Serial.print("Move slow: ");
+  Serial.print(from);
+  Serial.print(", ");
+  Serial.println(to);
+  
+  if(from <= to) {
+    for (int pos = from; pos <= to; pos += step) {
+      // in steps of 1 degree
+      servo.write(pos);
+      delay(15);
+    }
+  }
+  else {
+      for (int pos = from; pos >= to; pos -= step) {
+      // in steps of 1 degree
+      servo.write(pos);
+      delay(15);
+    }
   }
 }

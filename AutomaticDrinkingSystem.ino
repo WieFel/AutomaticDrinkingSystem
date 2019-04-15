@@ -21,7 +21,7 @@
 
 Servo servo;
 
-const int MIN_ANGLE = 30;
+const int MIN_ANGLE = 0;
 const int MAX_ANGLE = 180;
 
 int buttonPin = 12;
@@ -33,10 +33,10 @@ AdafruitIO_Feed *counter = io.feed("motor-button");
 
 void setup() {
   // start the serial connection
-  Serial.begin(115200);
+  Serial.begin(115200); 
 
   // wait for serial monitor to open
-  while(! Serial);
+//  while(! Serial);
 
   Serial.print("Connecting to Adafruit IO");
 
@@ -111,7 +111,8 @@ void loop() {
 void handleMessage(AdafruitIO_Data *data) {
   bool val = data->value();
   if(val) {
-    Serial.print("Received remote button press");
+    Serial.print("Received remote button press ");
+    Serial.println(val);
     prevState = drinking;
     if(drinking)
       drinking = false;

@@ -19,10 +19,20 @@
 #include <avr/dtostrf.h>
 #include <Servo.h>
 
-Servo servo;
+Servo rotationServo;
+Servo foldingServo;
 
-const int MIN_ANGLE = 0;
-const int MAX_ANGLE = 180;
+// min and max angles of rotation motor (rotating vertical bar)
+const int ROTATION_MIN_ANGLE = 180;
+const int ROTATION_MAX_ANGLE = 50;
+
+// min and max angles of folding motor (moving arm up/down)
+const int FOLDING_MIN_ANGLE = 0;
+const int FOLDING_MAX_ANGLE = 180;
+
+// servo motor pins
+const int PIN_ROTATION_SERVO = 9;
+const int PIN_FOLDING_SERVO = 5;
 
 int buttonPin = 12;
 bool prevState = false;
@@ -71,8 +81,14 @@ void setup() {
   Serial.println(io.statusText());
 
   // Do our setup for motor
-  servo.attach(9);  // attaches the servo on pin 9 to the servo object
-  servo.write(MIN_ANGLE);
+  rotationServo.attach(PIN_ROTATION_SERVO);  // attaches the servo on pin 9 to the servo object
+  int currentAngle = rotationServo.read();
+  moveSlow(rotationServo, currentAngle, ROTATION_MIN_ANGLE);
+
+
+  foldingServo.attach(PIN_FOLDING_SERVO);  // attaches the servo on pin 9 to the servo object
+  foldingServo.write(FOLDING_MIN_ANGLE);
+  
   pinMode(buttonPin, INPUT);
 }
 
@@ -93,19 +109,29 @@ void loop() {
     Serial.println(drinking);
   }
 
+
+  // ------------------ MOVEMENT ------------------ //
+  
   if(prevState != drinking) {
     // state changed -> rotate
-    Serial.println("drinking state changed!");
+    Serial.println("Drinking state changed!");
     prevState = drinking;
     if(drinking) {
-      moveSlow(MIN_ANGLE, MAX_ANGLE);
+      // unfold arm
+      moveSlow(foldingServo, FOLDING_MIN_ANGLE, FOLDING_MAX_ANGLE);
+      // rotate arm
+      moveSlow(rotationServo, ROTATION_MIN_ANGLE, ROTATION_MAX_ANGLE);
     }
     else {
-      moveSlow(MAX_ANGLE, MIN_ANGLE);
+      // rotate arm back
+      moveSlow(rotationServo, ROTATION_MAX_ANGLE, ROTATION_MIN_ANGLE);
+      // fold arm
+      moveSlow(foldingServo, FOLDING_MAX_ANGLE, FOLDING_MIN_ANGLE);
     }
   }
 
 }
+
 
 // handles incoming message from adafruit io API
 void handleMessage(AdafruitIO_Data *data) {
@@ -123,7 +149,7 @@ void handleMessage(AdafruitIO_Data *data) {
 
 
 // moves servo slowly from first angle to second angle
-void moveSlow(int from, int to) {
+void moveSlow(Servo motor, int from, int to) {
   const int step = 1;
   Serial.print("Move slow: ");
   Serial.print(from);
@@ -133,14 +159,14 @@ void moveSlow(int from, int to) {
   if(from <= to) {
     for (int pos = from; pos <= to; pos += step) {
       // in steps of 1 degree
-      servo.write(pos);
+      motor.write(pos);
       delay(15);
     }
   }
   else {
       for (int pos = from; pos >= to; pos -= step) {
       // in steps of 1 degree
-      servo.write(pos);
+      motor.write(pos);
       delay(15);
     }
   }

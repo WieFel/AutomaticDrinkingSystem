@@ -24,7 +24,7 @@ Servo foldingServo;
 
 // min and max angles of rotation motor (rotating vertical bar)
 const int ROTATION_MIN_ANGLE = 180;
-const int ROTATION_MAX_ANGLE = 70;
+const int ROTATION_MAX_ANGLE = 65;
 
 // min and max angles of folding motor (moving arm up/down)
 const int FOLDING_MIN_ANGLE = 180;
@@ -37,7 +37,6 @@ const int PIN_FOLDING_SERVO = 5;
 int buttonPin = 12;
 bool prevState = false;
 bool drinking = false; // states whether the system is switched to drinkng/not drinking
-bool first = true;
 
 // set up the 'motor-button' feed
 AdafruitIO_Feed *counter = io.feed("motor-button");

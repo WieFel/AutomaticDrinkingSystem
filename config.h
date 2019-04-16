@@ -14,11 +14,11 @@
 //   - Feather M0 WiFi -> https://www.adafruit.com/products/3010
 //   - Feather WICED -> https://www.adafruit.com/products/3056
 
-#define WIFI_SSID       "DrindeWifi"
-#define WIFI_PASS       "drinkindependently"
+//#define WIFI_SSID       "DrindeWifi"
+//#define WIFI_PASS       "drinkindependently"
 
-//#define WIFI_SSID       "TMSBatch9"
-//#define WIFI_PASS       "12345678"
+#define WIFI_SSID       "TMSBatch9"
+#define WIFI_PASS       "12345678"
 
 // comment out the following two lines if you are using fona or ethernet
 #include "AdafruitIO_WiFi.h"

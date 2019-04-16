@@ -135,10 +135,11 @@ void loop() {
 
 // handles incoming message from adafruit io API
 void handleMessage(AdafruitIO_Data *data) {
-  bool val = data->value();
-  if(val) {
-    Serial.print("Received remote button press ");
-    Serial.println(val);
+  int val = atoi(data->value());
+  Serial.print("Received remote button press ");
+  Serial.println(val);
+  if(val == 1) {
+    // received 1 -> change drinking state
     prevState = drinking;
     if(drinking)
       drinking = false;

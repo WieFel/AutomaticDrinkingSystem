@@ -24,11 +24,11 @@ Servo foldingServo;
 
 // min and max angles of rotation motor (rotating vertical bar)
 const int ROTATION_MIN_ANGLE = 180;
-const int ROTATION_MAX_ANGLE = 50;
+const int ROTATION_MAX_ANGLE = 70;
 
 // min and max angles of folding motor (moving arm up/down)
-const int FOLDING_MIN_ANGLE = 0;
-const int FOLDING_MAX_ANGLE = 180;
+const int FOLDING_MIN_ANGLE = 180;
+const int FOLDING_MAX_ANGLE = 0;
 
 // servo motor pins
 const int PIN_ROTATION_SERVO = 9;
@@ -37,6 +37,7 @@ const int PIN_FOLDING_SERVO = 5;
 int buttonPin = 12;
 bool prevState = false;
 bool drinking = false; // states whether the system is switched to drinkng/not drinking
+bool first = true;
 
 // set up the 'motor-button' feed
 AdafruitIO_Feed *counter = io.feed("motor-button");
@@ -82,12 +83,18 @@ void setup() {
 
   // Do our setup for motor
   rotationServo.attach(PIN_ROTATION_SERVO);  // attaches the servo on pin 9 to the servo object
-  int currentAngle = rotationServo.read();
-  moveSlow(rotationServo, currentAngle, ROTATION_MIN_ANGLE);
-
-
   foldingServo.attach(PIN_FOLDING_SERVO);  // attaches the servo on pin 9 to the servo object
-  foldingServo.write(FOLDING_MIN_ANGLE);
+
+  // setup motor positions
+//    int currentAngleRot = rotationServo.read();
+//    Serial.println(currentAngleRot);
+//    moveSlow(rotationServo, ROTATION_MIN_ANGLE, ROTATION_MAX_ANGLE);
+////    rotationServo.write(180);
+//    
+//    int currentAngleFold = foldingServo.read();
+//    Serial.println(currentAngleFold);
+//    moveSlow(foldingServo, FOLDING_MIN_ANGLE, FOLDING_MAX_ANGLE);
+////    foldingServo.write(FOLDING_MIN_ANGLE);
   
   pinMode(buttonPin, INPUT);
 }
@@ -118,14 +125,18 @@ void loop() {
     prevState = drinking;
     if(drinking) {
       // unfold arm
+      Serial.print("Folding: ");
       moveSlow(foldingServo, FOLDING_MIN_ANGLE, FOLDING_MAX_ANGLE);
       // rotate arm
+      Serial.print("Rotation: ");
       moveSlow(rotationServo, ROTATION_MIN_ANGLE, ROTATION_MAX_ANGLE);
     }
     else {
       // rotate arm back
+      Serial.print("Rotation: ");
       moveSlow(rotationServo, ROTATION_MAX_ANGLE, ROTATION_MIN_ANGLE);
       // fold arm
+      Serial.print("Folding: ");
       moveSlow(foldingServo, FOLDING_MAX_ANGLE, FOLDING_MIN_ANGLE);
     }
   }
